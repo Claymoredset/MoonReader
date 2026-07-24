@@ -9,17 +9,10 @@ more switching between a PDF viewer and a separate notes app.
 Built for autodidacts who want to study independently and keep track of
 their own progress.
 
-<!--
-  📸 Add a hero screenshot here! Something like the split view in action
-  (PDF on the left, a crop open on the canvas on the right) makes a great
-  first impression.
-
-  ![MoonReader in action](docs/screenshots/hero.png)
--->
+<img width="1740" height="747" alt="Screenshot From 2026-07-21 15-24-01" src="https://github.com/user-attachments/assets/4905ad1d-5e69-4587-afa5-7804e3d94e19" />
+<img width="1672" height="630" alt="Screenshot From 2026-07-20 20-52-14" src="https://github.com/user-attachments/assets/84e465e2-9f9e-4049-b2ed-5c194fa2aa1d" />
 
 ---
-
-## ✨ Features
 
 ### 📚 Library
 - Grid view with real page-1 covers for every imported PDF, lazy-loaded so
@@ -27,7 +20,8 @@ their own progress.
 - Remove a book with one click (your original PDF file is never touched).
 - Picks up right where you left off — resumes at the last page you were on.
 
-<!-- ![Library grid](docs/screenshots/library.png) -->
+<img width="1429" height="846" alt="Screenshot From 2026-07-24 18-10-01" src="https://github.com/user-attachments/assets/8161e576-828d-4f66-9d2a-ee2607ed76f0" />
+
 
 ### 📄 Reader
 - Continuous scroll, not page-by-page — reads like any modern PDF viewer.

@@ -1,0 +1,25 @@
+# Datos personales del usuario — NUNCA subir esto
+biblioteca.db
+biblioteca.db-journal
+biblioteca.db-wal
+biblioteca.db-shm
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Editor / sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Por si algún día guardás PDFs de prueba adentro de la carpeta del proyecto
+*.pdf

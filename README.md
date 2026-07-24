@@ -34,14 +34,14 @@ their own progress.
 
 <!-- ![Reader with thumbnails](docs/screenshots/reader.png) -->
 
-### ✂️ Crops
+### Crops
 - Drag a rectangle over any part of a page to create a crop.
 - Resize or reposition it anytime by dragging its corner handles.
 - Delete it with a right-click.
 
 <!-- ![Creating a crop](docs/screenshots/crop.png) -->
 
-### 🎨 Canvas
+### Canvas
 Opening a crop reveals an infinite, pannable, zoomable canvas right next to
 the PDF — this is where the actual studying happens.
 
@@ -57,14 +57,14 @@ the PDF — this is where the actual studying happens.
 
 <!-- ![Canvas with drawings](docs/screenshots/canvas.png) -->
 
-### 🌙 Everything else
+### Everything else
 - Dark mode (View → Dark mode).
 - Everything autosaves to a local SQLite database — nothing to remember
   to hit "save" on.
 
 ---
 
-## 🚀 Getting started
+## Getting started
 
 ```bash
 git clone https://github.com/Claymoredset/MoonReader.git

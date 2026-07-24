@@ -10,7 +10,8 @@ Built for autodidacts who want to study independently and keep track of
 their own progress.
 
 <img width="1740" height="747" alt="Screenshot From 2026-07-21 15-24-01" src="https://github.com/user-attachments/assets/4905ad1d-5e69-4587-afa5-7804e3d94e19" />
-<img width="1672" height="630" alt="Screenshot From 2026-07-20 20-52-14" src="https://github.com/user-attachments/assets/84e465e2-9f9e-4049-b2ed-5c194fa2aa1d" />
+<img width="1919" height="984" alt="Screenshot From 2026-07-24 18-29-16" src="https://github.com/user-attachments/assets/15e70f5d-a8c5-464f-9810-49b876c9fa35" />
+
 
 ---
 

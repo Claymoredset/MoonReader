@@ -8,18 +8,10 @@ more switching between a PDF viewer and a separate notes app.
 
 Built for autodidacts who want to study independently and keep track of
 their own progress.
+<img width="1919" height="984" alt="Screenshot From 2026-07-24 18-29-16" src="https://github.com/user-attachments/assets/15e70f5d-a8c5-464f-9810-49b876c9fa35" />
 
-<!--
-  📸 Add a hero screenshot here! Something like the split view in action
-  (PDF on the left, a crop open on the canvas on the right) makes a great
-  first impression.
-
-  ![MoonReader in action](docs/screenshots/hero.png)
--->
 
 ---
-
-## ✨ Features
 
 ### 📚 Library
 - Grid view with real page-1 covers for every imported PDF, lazy-loaded so
@@ -27,7 +19,8 @@ their own progress.
 - Remove a book with one click (your original PDF file is never touched).
 - Picks up right where you left off — resumes at the last page you were on.
 
-<!-- ![Library grid](docs/screenshots/library.png) -->
+<img width="1429" height="846" alt="Screenshot From 2026-07-24 18-10-01" src="https://github.com/user-attachments/assets/8161e576-828d-4f66-9d2a-ee2607ed76f0" />
+
 
 ### 📄 Reader
 - Continuous scroll, not page-by-page — reads like any modern PDF viewer.
@@ -40,14 +33,14 @@ their own progress.
 
 <!-- ![Reader with thumbnails](docs/screenshots/reader.png) -->
 
-### ✂️ Crops
+### Crops
 - Drag a rectangle over any part of a page to create a crop.
 - Resize or reposition it anytime by dragging its corner handles.
 - Delete it with a right-click.
 
 <!-- ![Creating a crop](docs/screenshots/crop.png) -->
 
-### 🎨 Canvas
+### Canvas
 Opening a crop reveals an infinite, pannable, zoomable canvas right next to
 the PDF — this is where the actual studying happens.
 
@@ -63,14 +56,14 @@ the PDF — this is where the actual studying happens.
 
 <!-- ![Canvas with drawings](docs/screenshots/canvas.png) -->
 
-### 🌙 Everything else
+### Everything else
 - Dark mode (View → Dark mode).
 - Everything autosaves to a local SQLite database — nothing to remember
   to hit "save" on.
 
 ---
 
-## 🚀 Getting started
+## Getting started
 
 ```bash
 git clone https://github.com/Claymoredset/MoonReader.git

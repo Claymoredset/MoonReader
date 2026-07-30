@@ -133,6 +133,16 @@ def obtener_libro(libro_id):
     return dict(row) if row else None
 
 
+def obtener_libro_por_ruta(ruta_archivo):
+    """Busca un libro ya importado por su ruta exacta."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM libros WHERE ruta_archivo = ?", (ruta_archivo,))
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def actualizar_ultima_pagina(libro_id, pagina):
     conn = get_connection()
     cur = conn.cursor()
@@ -263,10 +273,16 @@ def cargar_trazos(recorte_id):
 
     resultado = []
     for r in rows:
-        datos = json.loads(r["datos_json"])
+        try:
+            datos = json.loads(r["datos_json"])
+        except (TypeError, json.JSONDecodeError):
+            # Una anotación dañada no debe impedir abrir todo el recorte.
+            # Se conserva el resto de las anotaciones válidas.
+            continue
         if isinstance(datos, dict):
-            resultado.append(datos)
-        else:
+            if datos.get("tipo") in {"lapiz", "rectangulo", "elipse", "flecha", "texto"}:
+                resultado.append(datos)
+        elif isinstance(datos, list):
             # formato viejo: datos_json era directamente la lista de puntos
             resultado.append({
                 "tipo": "lapiz",

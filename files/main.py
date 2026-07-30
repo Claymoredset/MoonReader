@@ -62,6 +62,7 @@ class VistaBiblioteca(QWidget):
         layout = QVBoxLayout(self)
 
         titulo = QLabel("📚 My library")
+        titulo.setObjectName("libraryTitle")
         titulo.setStyleSheet("font-size: 20px; font-weight: bold; padding: 8px;")
         layout.addWidget(titulo)
 
@@ -204,6 +205,14 @@ class VistaBiblioteca(QWidget):
         ruta, _ = QFileDialog.getOpenFileName(self, "Import PDF", "", "PDF (*.pdf)")
         if not ruta:
             return
+        ruta = os.path.abspath(ruta)
+        existente = db.obtener_libro_por_ruta(ruta)
+        if existente:
+            QMessageBox.information(
+                self, "Already in library",
+                f'"{existente["titulo"]}" is already in your library.',
+            )
+            return
         try:
             doc = fitz.open(ruta)
             titulo = doc.metadata.get("title") or os.path.splitext(os.path.basename(ruta))[0]
@@ -213,7 +222,11 @@ class VistaBiblioteca(QWidget):
             QMessageBox.warning(self, "Error", f"Could not open the PDF: {e}")
             return
 
-        db.agregar_libro(titulo, autor, ruta)
+        try:
+            db.agregar_libro(titulo, autor, ruta)
+        except Exception as e:
+            QMessageBox.warning(self, "Import error", f"Could not import the PDF: {e}")
+            return
         self.refrescar()
         self.mostrar_estado(f'"{titulo}" imported successfully.')
 
@@ -238,6 +251,7 @@ class VistaLectorEdicion(QWidget):
         self.btn_volver = QPushButton("← Library")
         self.btn_volver.clicked.connect(self.on_volver)
         self.label_libro = QLabel("")
+        self.label_libro.setObjectName("readerTitle")
         self.label_libro.setStyleSheet("font-weight: bold;")
         self.chk_ref_siempre = QCheckBox("Always show the reference when opening a crop")
         self.chk_ref_siempre.toggled.connect(self._toggle_ref_siempre)
@@ -392,7 +406,9 @@ class VistaLectorEdicion(QWidget):
         )
         mat = fitz.Matrix(RENDER_ZOOM, RENDER_ZOOM)
         pix = page.get_pixmap(matrix=mat, clip=rect)
-        img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888)
+        # Copiar el buffer: PyMuPDF libera ``pix`` al salir de esta función.
+        # Sin la copia, la referencia puede aparecer corrupta o vacía.
+        img = QImage(pix.samples, pix.width, pix.height, pix.stride, QImage.Format_RGB888).copy()
         return QPixmap.fromImage(img)
 
     def _guardar_hoja_actual(self):
@@ -504,8 +520,8 @@ QMainWindow, QStackedWidget {
 QPushButton {
     background-color: #ffffff;
     border: 1px solid #d5d8dd;
-    border-radius: 6px;
-    padding: 6px 12px;
+    border-radius: 7px;
+    padding: 7px 12px;
 }
 
 QPushButton:hover {
@@ -525,6 +541,35 @@ QPushButton:checked {
 
 QPushButton:checked:hover {
     background-color: #3f63d6;
+}
+
+QPushButton[toolbar="true"] {
+    min-width: 30px;
+    padding: 6px 9px;
+}
+
+#libraryTitle {
+    font-size: 23px;
+    font-weight: 700;
+    padding: 12px 8px 6px 8px;
+}
+
+#readerTitle, #cropTitle {
+    font-size: 15px;
+    font-weight: 650;
+    padding: 4px 6px;
+}
+
+#readerMeta {
+    color: #586174;
+    font-weight: 600;
+    padding: 4px 2px;
+}
+
+QGraphicsView#annotationCanvas, QGraphicsView#pdfCanvas {
+    background-color: #ffffff;
+    border: 1px solid #dce1e9;
+    border-radius: 8px;
 }
 
 QLabel {
@@ -642,8 +687,8 @@ QMainWindow, QStackedWidget {
 QPushButton {
     background-color: #2b2d31;
     border: 1px solid #45484e;
-    border-radius: 6px;
-    padding: 6px 12px;
+    border-radius: 7px;
+    padding: 7px 12px;
     color: #e6e6e6;
 }
 
@@ -664,6 +709,35 @@ QPushButton:checked {
 
 QPushButton:checked:hover {
     background-color: #6d8fff;
+}
+
+QPushButton[toolbar="true"] {
+    min-width: 30px;
+    padding: 6px 9px;
+}
+
+#libraryTitle {
+    font-size: 23px;
+    font-weight: 700;
+    padding: 12px 8px 6px 8px;
+}
+
+#readerTitle, #cropTitle {
+    font-size: 15px;
+    font-weight: 650;
+    padding: 4px 6px;
+}
+
+#readerMeta {
+    color: #aeb7c7;
+    font-weight: 600;
+    padding: 4px 2px;
+}
+
+QGraphicsView#annotationCanvas, QGraphicsView#pdfCanvas {
+    background-color: #202226;
+    border: 1px solid #3a3d42;
+    border-radius: 8px;
 }
 
 QLabel {

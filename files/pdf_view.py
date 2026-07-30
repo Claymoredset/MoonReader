@@ -207,6 +207,13 @@ class RecorteOverlayItem(QGraphicsRectItem):
             nuevo_alto = max(ALTO_MINIMO_RECORTE, punto_escena.y() - r.y())
             nuevo = QRectF(r.x() + r.width() - nuevo_ancho, r.y(), nuevo_ancho, nuevo_alto)
 
+        # Un recorte no puede extenderse a los márgenes ni a otra página.
+        # Además de evitar referencias vacías, esto mantiene las coordenadas
+        # PDF guardadas siempre válidas al reabrir el documento.
+        info = self.parent_view.paginas_info[self.pagina]
+        limites = QRectF(info["x_offset"], info["y_offset"],
+                         info["w_scene"], info["h_scene"])
+        nuevo = nuevo.intersected(limites)
         self.setRect(nuevo)
         for m in self.manijas:
             self._posicionar_manija(m, m.esquina)
@@ -548,6 +555,11 @@ class PDFGraphicsView(QGraphicsView):
     def mousePressEvent(self, event):
         if self.modo_seleccion and event.button() == Qt.LeftButton:
             self._origen_drag = self.mapToScene(event.pos())
+            if self._pagina_en_punto(self._origen_drag) is None:
+                # Ignorar el espacio entre páginas y los márgenes laterales.
+                self._origen_drag = None
+                event.accept()
+                return
             self._rect_temp = QGraphicsRectItem(QRectF(self._origen_drag, self._origen_drag))
             self._rect_temp.setBrush(QBrush(QColor(0, 150, 255, 60)))
             self._rect_temp.setPen(QPen(QColor(0, 120, 255, 220), 2, Qt.DashLine))
@@ -567,10 +579,25 @@ class PDFGraphicsView(QGraphicsView):
     def mouseMoveEvent(self, event):
         if self.modo_seleccion and self._rect_temp is not None:
             actual = self.mapToScene(event.pos())
+            pagina = self._pagina_en_punto(self._origen_drag)
+            info = self.paginas_info[pagina]
+            actual.setX(min(max(actual.x(), info["x_offset"]),
+                            info["x_offset"] + info["w_scene"]))
+            actual.setY(min(max(actual.y(), info["y_offset"]),
+                            info["y_offset"] + info["h_scene"]))
             rect = QRectF(self._origen_drag, actual).normalized()
             self._rect_temp.setRect(rect)
             return
         super().mouseMoveEvent(event)
+
+    def _pagina_en_punto(self, punto):
+        """Índice de la página que contiene el punto, o ``None`` en un margen."""
+        for i, info in enumerate(self.paginas_info):
+            limites = QRectF(info["x_offset"], info["y_offset"],
+                             info["w_scene"], info["h_scene"])
+            if limites.contains(punto):
+                return i
+        return None
 
     def mouseReleaseEvent(self, event):
         if self.modo_seleccion and self._rect_temp is not None and event.button() == Qt.LeftButton:
@@ -754,6 +781,7 @@ class LectorWidget(QWidget):
         self.btn_miniaturas.setToolTip("Show/hide thumbnail panel")
         self.btn_miniaturas.setFixedWidth(32)
         self.label_pagina = QLabel("Page 1 / 1")
+        self.label_pagina.setObjectName("readerMeta")
         self.spin_ir_a = QSpinBox()
         self.spin_ir_a.setMinimum(1)
         self.spin_ir_a.setMaximum(1)
@@ -798,6 +826,7 @@ class LectorWidget(QWidget):
         layout.addLayout(fila_marcadores)
 
         self.view = PDFGraphicsView()
+        self.view.setObjectName("pdfCanvas")
         layout.addWidget(self.view)
 
         splitter.addWidget(contenedor_principal)

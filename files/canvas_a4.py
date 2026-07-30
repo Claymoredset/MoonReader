@@ -46,6 +46,7 @@ ANCHO_REFERENCIA_DEFAULT = 700
 ALTO_REFERENCIA_DEFAULT = int(ANCHO_REFERENCIA_DEFAULT * 1.4142)
 
 MARGEN_SELECCION = 8  # tolerancia en px (de escena) para hacer click sobre un elemento
+DISTANCIA_MINIMA_TRAZO = 1.2  # evita puntos redundantes producidos por el mouse
 
 # La escena es muy grande pero finita (esto ya cubre cualquier uso real de
 # una hoja de anotaciones; nadie va a panear 25000 unidades en la práctica).
@@ -360,6 +361,26 @@ class CanvasDibujo(QGraphicsView):
                 return el
         return None
 
+    def _agregar_punto_suavizado(self, x, y, forzar=False):
+        """Añade un punto al lápiz aplicando un filtro ligero.
+
+        Los eventos del mouse llegan a intervalos irregulares; sin este filtro
+        se notan pequeños quiebres y zonas con demasiados puntos. Conservamos
+        el último punto real al soltar para que el trazo termine exactamente
+        donde el usuario levantó el lápiz.
+        """
+        puntos = self._elemento_en_progreso["puntos"]
+        ultimo_x, ultimo_y = puntos[-1]
+        distancia = math.hypot(x - ultimo_x, y - ultimo_y)
+        if not forzar and distancia < DISTANCIA_MINIMA_TRAZO:
+            return
+        if forzar or len(puntos) == 1:
+            puntos.append((x, y))
+            return
+        # 70 % del movimiento nuevo: elimina ruido sin dar sensación de retraso.
+        puntos.append((ultimo_x + (x - ultimo_x) * 0.70,
+                       ultimo_y + (y - ultimo_y) * 0.70))
+
     # ---------- Eventos de mouse ----------
     # Nota: todas las coordenadas se convierten con self.mapToScene(...) para
     # que la lógica de dibujo/selección funcione en coordenadas de escena
@@ -458,7 +479,7 @@ class CanvasDibujo(QGraphicsView):
             return
 
         if self.herramienta == "lapiz":
-            self._elemento_en_progreso["puntos"].append((p.x(), p.y()))
+            self._agregar_punto_suavizado(p.x(), p.y())
         elif self.herramienta in ("rectangulo", "elipse"):
             ox, oy = self._origen_forma
             self._elemento_en_progreso["x"] = min(ox, p.x())
@@ -494,6 +515,13 @@ class CanvasDibujo(QGraphicsView):
 
         el = self._elemento_en_progreso
         self._elemento_en_progreso = None
+        if el["tipo"] == "lapiz":
+            # El último evento de movimiento puede no coincidir con el de
+            # soltar; fijamos el extremo para que no quede una punta cortada.
+            p = self.mapToScene(event.position().toPoint())
+            puntos = el["puntos"]
+            if math.hypot(p.x() - puntos[-1][0], p.y() - puntos[-1][1]) > 0.1:
+                puntos.append((p.x(), p.y()))
         valido = True
         if el["tipo"] == "lapiz":
             valido = len(el["puntos"]) > 1
@@ -725,6 +753,7 @@ class HojaEdicionWidget(QWidget):
         # --- barra superior: título + referencia + limpiar ---
         barra_superior = QHBoxLayout()
         self.label_recorte = QLabel("No crop open")
+        self.label_recorte.setObjectName("cropTitle")
         self.btn_referencia = QPushButton("👁 Show reference")
         self.btn_referencia.setCheckable(True)
         self.btn_limpiar = QPushButton("🗑 Clear sheet")
@@ -744,6 +773,7 @@ class HojaEdicionWidget(QWidget):
             btn = QPushButton(texto)
             btn.setCheckable(True)
             btn.setProperty("herramienta", nombre)
+            btn.setProperty("toolbar", True)
             self.grupo_herramientas.addButton(btn)
             barra_herramientas.addWidget(btn)
             return btn
@@ -803,6 +833,7 @@ class HojaEdicionWidget(QWidget):
 
         # --- lienzo infinito (ya no necesita QScrollArea) ---
         self.canvas = CanvasDibujo()
+        self.canvas.setObjectName("annotationCanvas")
         layout.addWidget(self.canvas, stretch=1)
 
         ayuda = QLabel("Ctrl + mouse wheel: zoom  ·  middle mouse button: pan")
@@ -903,4 +934,8 @@ class HojaEdicionWidget(QWidget):
         # aplicar el fondo propio de ESTE recorte (no un default global)
         self.canvas.set_color_fondo(QColor(color_fondo or "#ffffff"))
         self.canvas.set_estilo_fondo(estilo_fondo or "liso")
+        # Cambiar el estado visual no es una acción del usuario: bloquear la
+        # señal evita que abrir un recorte cambie el default de recortes nuevos.
+        self.btn_cuadriculado.blockSignals(True)
         self.btn_cuadriculado.setChecked((estilo_fondo or "liso") == "cuadriculado")
+        self.btn_cuadriculado.blockSignals(False)
